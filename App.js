@@ -1,21 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-gesture-handler';
+import React, { useState } from 'react';
+import * as Font from 'expo-font';
+import AppLoading from 'expo-app-loading';
+import { enableScreens } from 'react-native-screens';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import MainNavigator from './navigation/MainNavigator';
+import MealsReducer from './store/reducers/meals';
+import modalReducer from './store/reducers/modal';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const rootReducer = combineReducers({
+  meals: MealsReducer,
+  modal: modalReducer,
 });
+
+const store = createStore(rootReducer);
+
+const fetchFont = () => {
+  enableScreens();
+
+  return Font.loadAsync({
+    openSansRegular: require('./assets/Fonts/OpenSans-Regular.ttf'),
+    openSansBold: require('./assets/Fonts/OpenSans-Bold.ttf'),
+  });
+};
+
+const App = () => {
+  const [loadData, setLoadData] = useState(false);
+
+  if (!loadData) {
+    return (
+      <AppLoading startAsync={fetchFont} onFinish={() => setLoadData(true)} onError={console.log('errorfetchFont')} />
+    );
+  }
+  return (
+    <Provider store={store}>
+      <MainNavigator></MainNavigator>
+    </Provider>
+  );
+};
+
+export default App;
